@@ -1,5 +1,4 @@
 function Game() {
-    // Game state
     this.map = [];
     this.width = 40;
     this.height = 24;
@@ -7,9 +6,8 @@ function Game() {
     this.enemies = [];
     this.items = [];
     this.rooms = [];
-    this.keys = {}; // Track pressed keys
+    this.keys = {}; 
     
-    // Game constants
     this.TILE_TYPES = {
         WALL: 'W',
         EMPTY: '-',
@@ -19,7 +17,6 @@ function Game() {
         HEALTH_POTION: 'HP'
     };
     
-    // Initialize the game
     this.init = function() {
         this.generateMap();
         this.placeRooms();
@@ -32,7 +29,6 @@ function Game() {
         this.startGameLoop();
     };
     
-    // Generate empty map filled with walls
     this.generateMap = function() {
         this.map = [];
         for (let y = 0; y < this.height; y++) {
@@ -44,18 +40,16 @@ function Game() {
         }
     };
     
-    // Place random rooms
     this.placeRooms = function() {
-        const numRooms = Math.floor(Math.random() * 6) + 5; // 5-10 rooms
+        const numRooms = Math.floor(Math.random() * 6) + 5; 
         this.rooms = [];
         
         for (let i = 0; i < numRooms; i++) {
-            const width = Math.floor(Math.random() * 6) + 3; // 3-8 width
-            const height = Math.floor(Math.random() * 6) + 3; // 3-8 height
+            const width = Math.floor(Math.random() * 6) + 3; 
+            const height = Math.floor(Math.random() * 6) + 3; 
             const x = Math.floor(Math.random() * (this.width - width - 2)) + 1;
             const y = Math.floor(Math.random() * (this.height - height - 2)) + 1;
             
-            // Check if room overlaps with existing rooms
             let overlaps = false;
             for (let room of this.rooms) {
                 if (x < room.x + room.width + 1 && x + width + 1 > room.x &&
@@ -66,14 +60,12 @@ function Game() {
             }
             
             if (!overlaps) {
-                // Place room
                 for (let dy = 0; dy < height; dy++) {
                     for (let dx = 0; dx < width; dx++) {
                         this.map[y + dy][x + dx] = this.TILE_TYPES.EMPTY;
                     }
                 }
                 
-                // Store room info
                 this.rooms.push({
                     x: x,
                     y: y,
@@ -83,35 +75,29 @@ function Game() {
                     centerY: Math.floor(y + height / 2)
                 });
             } else {
-                i--; // Try again
+                i--; 
             }
         }
     };
     
-    // Connect rooms with corridors
     this.connectRooms = function() {
-        // Sort rooms by x coordinate
         this.rooms.sort((a, b) => a.centerX - b.centerX);
         
-        // Connect adjacent rooms
         for (let i = 0; i < this.rooms.length - 1; i++) {
             const room1 = this.rooms[i];
             const room2 = this.rooms[i + 1];
             
-            // Create L-shaped corridor
             const startX = room1.centerX;
             const startY = room1.centerY;
             const endX = room2.centerX;
             const endY = room2.centerY;
             
-            // Horizontal corridor
             const x1 = Math.min(startX, endX);
             const x2 = Math.max(startX, endX);
             for (let x = x1; x <= x2; x++) {
                 this.map[startY][x] = this.TILE_TYPES.EMPTY;
             }
             
-            // Vertical corridor
             const y1 = Math.min(startY, endY);
             const y2 = Math.max(startY, endY);
             for (let y = y1; y <= y2; y++) {
@@ -119,8 +105,7 @@ function Game() {
             }
         }
         
-        // Add some random additional corridors
-        const numExtraCorridors = Math.floor(Math.random() * 3) + 2; // 2-4 extra corridors
+        const numExtraCorridors = Math.floor(Math.random() * 3) + 2; 
         for (let i = 0; i < numExtraCorridors; i++) {
             const room1 = this.rooms[Math.floor(Math.random() * this.rooms.length)];
             const room2 = this.rooms[Math.floor(Math.random() * this.rooms.length)];
@@ -131,7 +116,6 @@ function Game() {
                 const endX = room2.centerX;
                 const endY = room2.centerY;
                 
-                // Create L-shaped corridor
                 const x1 = Math.min(startX, endX);
                 const x2 = Math.max(startX, endX);
                 for (let x = x1; x <= x2; x++) {
@@ -147,20 +131,16 @@ function Game() {
         }
     };
     
-    // Place items (swords and health potions)
     this.placeItems = function() {
-        // Place swords
         for (let i = 0; i < 2; i++) {
             this.placeRandomItem(this.TILE_TYPES.SWORD);
         }
         
-        // Place health potions
         for (let i = 0; i < 10; i++) {
             this.placeRandomItem(this.TILE_TYPES.HEALTH_POTION);
         }
     };
     
-    // Helper function to place items in random empty spots
     this.placeRandomItem = function(itemType) {
         let placed = false;
         let attempts = 0;
@@ -177,7 +157,6 @@ function Game() {
         }
     };
     
-    // Place hero in random empty spot
     this.placeHero = function() {
         let placed = false;
         while (!placed) {
@@ -198,7 +177,6 @@ function Game() {
         }
     };
     
-    // Place enemies in random empty spots
     this.placeEnemies = function() {
         for (let i = 0; i < 10; i++) {
             let placed = false;
@@ -220,7 +198,6 @@ function Game() {
         }
     };
     
-    // Render the game state
     this.render = function() {
         const field = $('.field');
         field.empty();
@@ -268,14 +245,12 @@ function Game() {
         }
     };
     
-    // Setup keyboard controls
     this.setupControls = function() {
         var self = this;
         $(document).on('keydown', function(e) {
             e.preventDefault();
             const key = e.key.toLowerCase();
             
-            // Support both English and Russian layouts
             switch(key) {
                 case 'w':
                 case 'ц':
@@ -300,7 +275,6 @@ function Game() {
         });
     };
     
-    // Game loop
     this.startGameLoop = function() {
         var self = this;
         setInterval(function() {
@@ -308,9 +282,7 @@ function Game() {
         }, 100);
     };
     
-    // Main game loop
     this.gameLoop = function() {
-        // Handle movement
         if (this.keys['w'] || this.keys['ц']) {
             this.moveHero(0, -1);
         }
@@ -328,17 +300,15 @@ function Game() {
         }
     };
     
-    // Move enemies
     this.moveEnemies = function() {
         for (let enemy of this.enemies) {
             const directions = [
-                {dx: 0, dy: -1}, // up
-                {dx: 0, dy: 1},  // down
-                {dx: -1, dy: 0}, // left
-                {dx: 1, dy: 0}   // right
+                {dx: 0, dy: -1}, 
+                {dx: 0, dy: 1},  
+                {dx: -1, dy: 0}, 
+                {dx: 1, dy: 0}   
             ];
             
-            // Randomly choose a direction
             const dir = directions[Math.floor(Math.random() * directions.length)];
             const newX = enemy.x + dir.dx;
             const newY = enemy.y + dir.dy;
@@ -354,13 +324,12 @@ function Game() {
         }
     };
     
-    // Check for adjacent enemies and take damage
     this.checkEnemyAttacks = function() {
         const directions = [
-            {dx: 0, dy: -1}, // up
-            {dx: 0, dy: 1},  // down
-            {dx: -1, dy: 0}, // left
-            {dx: 1, dy: 0}   // right
+            {dx: 0, dy: -1}, 
+            {dx: 0, dy: 1},  
+            {dx: -1, dy: 0}, 
+            {dx: 1, dy: 0}  
         ];
         
         for (let dir of directions) {
@@ -378,7 +347,6 @@ function Game() {
         }
     };
     
-    // Move hero
     this.moveHero = function(dx, dy) {
         const newX = this.hero.x + dx;
         const newY = this.hero.y + dy;
@@ -390,35 +358,28 @@ function Game() {
                 targetTile === this.TILE_TYPES.SWORD || 
                 targetTile === this.TILE_TYPES.HEALTH_POTION) {
                 
-                // Clear old position
                 this.map[this.hero.y][this.hero.x] = this.TILE_TYPES.EMPTY;
                 
-                // Handle items
                 if (targetTile === this.TILE_TYPES.SWORD) {
                     this.hero.hasSword = true;
                     this.items = this.items.filter(item => !(item.x === newX && item.y === newY));
                 } else if (targetTile === this.TILE_TYPES.HEALTH_POTION) {
-                    // Restore 50% of max health
                     const maxHealth = 100;
                     const healAmount = Math.floor(maxHealth * 0.5);
                     this.hero.health = Math.min(maxHealth, this.hero.health + healAmount);
                     this.items = this.items.filter(item => !(item.x === newX && item.y === newY));
                 }
                 
-                // Update hero position
                 this.hero.x = newX;
                 this.hero.y = newY;
                 this.map[newY][newX] = this.TILE_TYPES.HERO;
                 
-                // Move enemies
                 this.moveEnemies();
                 
-                // Check for enemy attacks after movement
                 this.checkEnemyAttacks();
                 
                 this.render();
                 
-                // Check for Game Over after rendering
                 if (this.hero.health <= 0) {
                     this.render();
                     alert('Game Over!');
@@ -428,7 +389,6 @@ function Game() {
         }
     };
     
-    // Hero attack
     this.heroAttack = function() {
         const directions = [
             {dx: 0, dy: -1},
